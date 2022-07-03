@@ -6,6 +6,8 @@ import { ChatService } from "src/data/chat.service";
 import { ChatAddDto } from "./chat-add.dto";
 import { ChatReadDto } from "./chat-read.dto";
 import { CryptoService } from "src/crypto.service";
+import { UserService } from "src/data/user.service";
+import * as forge from "node-forge"
 
 @ApiTags("chat")
 @Controller({
@@ -15,6 +17,7 @@ import { CryptoService } from "src/crypto.service";
 export class ChatsController {
     constructor (
         private readonly chatService: ChatService,
+        private readonly userService: UserService,
         private readonly cryptoService: CryptoService
     ) {}
 
@@ -47,6 +50,16 @@ export class ChatsController {
     async createChat(
         @Body(new ValidationPipe(validationOptions)) chatAddDto: ChatAddDto
     ): Promise<ChatReadDto> {
+        const user = await this.userService.findByUserId(chatAddDto.userId)
+        const publicUserKey = user?.certificate == null ? null : forge.pki.publicKeyFromPem(user?.publicKey)
+        const signatureMessage = `userId:${chatAddDto.userId};name:${chatAddDto.name};`
+        const verified = publicUserKey != null
+            && this.cryptoService.verifyMessageWithKey(signatureMessage, chatAddDto.userSignature, publicUserKey)
+
+        if (!verified) {
+            console.warn(`ChatController: Invalid signature (POST /chat)`)
+        }
+
         const chatEntity = new ChatEntity()
         chatEntity.userId = chatAddDto.userId
         chatEntity.userSignature = chatAddDto.userSignature
