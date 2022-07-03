@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import { Router } from "@angular/router";
-import { __classPrivateFieldIn } from "tslib";
 import { UsersService } from "../users/users.service";
 
 @Component({
