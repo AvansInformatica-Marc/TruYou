@@ -6,7 +6,6 @@ import { UserService } from "src/data/user.service"
 import { UserAddDto } from "./user-add.dto"
 import { UserReadDto } from "./user-read.dto"
 import { pki } from "node-forge"
-import * as crypto from "node:crypto"
 import { CryptoService } from "src/crypto.service"
 
 @ApiTags("users")
@@ -56,18 +55,16 @@ export class UserController {
         userEntity.userSignature = userAddDto.userSignature
 
         const message = `name:${userEntity.name};publicKey:${userEntity.publicKey.replace(/\r\n/g, "")};`
-        const signer = crypto.createVerify('RSA-SHA512')
-        signer.write(message)
-        signer.end()
 
         const userKey = pki.publicKeyFromPem(userAddDto.publicKey)
         const isVerified = this.cryptoService.verifyMessageWithKey(message, userEntity.userSignature, userKey)
 
-        if(!isVerified) {
-            throw new UnauthorizedException()
-        }
-
         const createdUser = await this.userService.create(userEntity)
+
+        if(!isVerified) {
+            console.warn(`UserController: Invalid signature (POST /user, id ${createdUser.userId})`)
+            return await this.mapUserEntityToUserReadDto(createdUser)
+        }
 
         const cert = await this.cryptoService.createUserCertificate(
             createdUser.userId,

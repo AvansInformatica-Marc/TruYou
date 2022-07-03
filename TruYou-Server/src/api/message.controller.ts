@@ -6,6 +6,8 @@ import { MessageService } from "src/data/message.service";
 import { MessageAddDto } from "./message-add.dto";
 import { MessageReadDto } from "./message-read.dto";
 import { CryptoService } from "src/crypto.service";
+import { UserService } from "src/data/user.service";
+import * as forge from "node-forge"
 
 @ApiTags("chat")
 @Controller({
@@ -15,6 +17,7 @@ import { CryptoService } from "src/crypto.service";
 export class MessageController {
     constructor (
         private readonly messageService: MessageService,
+        private readonly userService: UserService,
         private readonly cryptoService: CryptoService
     ) {}
 
@@ -54,6 +57,16 @@ export class MessageController {
     ): Promise<MessageReadDto> {
         if (chatId != messageAddDto.chatId) {
             throw new BadRequestException()
+        }
+
+        const user = await this.userService.findByUserId(messageAddDto.senderId)
+        const publicUserKey = user?.certificate == null ? null : forge.pki.publicKeyFromPem(user?.publicKey)
+        const signatureMessage = `chatId:${chatId};senderId:${messageAddDto.senderId};message:${messageAddDto.message};`
+        const verified = publicUserKey != null
+            && this.cryptoService.verifyMessageWithKey(signatureMessage, messageAddDto.senderSignature, publicUserKey)
+
+        if (!verified) {
+            console.warn(`MessageController: Invalid signature (POST /chat/${chatId}/messages)`)
         }
 
         const messageEntity = new MessageEntity()
