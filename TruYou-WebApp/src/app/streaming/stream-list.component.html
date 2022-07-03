@@ -1,0 +1,30 @@
+<mat-spinner *ngIf="isLoading"></mat-spinner>
+<section *ngIf="!isLoading">
+    <h4 *ngIf="chats!.length == 0">No active chats</h4>
+    <mat-card class="play-stream" *ngFor="let chat of chats" [routerLink]="['/chats', chat.chatId]">
+        <mat-card-header>
+            <mat-card-title>{{ chat.name }}</mat-card-title>
+            <mat-card-subtitle>Chat by {{ names.get(chat.userId) }}</mat-card-subtitle>
+        </mat-card-header>
+    </mat-card>
+
+    <br>
+    <br>
+    <h2>New chat</h2>
+    <mat-form-field *ngIf="isRegistered" class="create-chat" appearance="fill">
+        <mat-label>Topic</mat-label>
+        <input matInput type="text" [(ngModel)]="topicName">
+    </mat-form-field>
+
+    <button *ngIf="topicName" matSuffix mat-raised-button color="accent" aria-label="create" (click)="createChat()">
+        Create
+    </button>
+
+    <button *ngIf="isRegistered" matSuffix mat-stroked-button aria-label="log out" (click)="logout()">
+        Log out
+    </button>
+
+    <button *ngIf="!isRegistered" matSuffix mat-raised-button color="accent" aria-label="Register" routerLink="/register">
+        Register
+    </button>
+</section>

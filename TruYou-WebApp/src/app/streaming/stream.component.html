@@ -1,0 +1,9 @@
+<section class="stream-container">
+    <section class="stream">
+        <mat-spinner *ngIf="!chat"></mat-spinner>
+        <h2 *ngIf="user">Chat by {{ user.name }}</h2>
+        <p>Chat started on: {{ chat?.creationDate | date:'medium' }}</p>
+    </section>
+
+    <chat class="chat" *ngIf="chat" [chatId]="chat.chatId"></chat>
+</section>

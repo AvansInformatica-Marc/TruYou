@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  truyou_db:
+    image: postgres:14-alpine
+    container_name: 'truyou_db'
+    restart: on-failure
+    volumes:
+      - truyou_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=@dministrat0r!
+      - POSTGRES_DB=truyou
+
+  backend:
+    image: tru_you/backend:1.0
+    build: TruYou-Server
+    restart: on-failure
+    ports:
+      - '3000:3000'
+    environment:
+      - POSTGRES_HOST=truyou_db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=@dministrat0r!
+      - POSTGRES_DB=truyou
+    depends_on:
+      - truyou_db
+
+  webapp:
+    image: tru_you/webapp:1.0
+    build:
+      context: TruYou-WebApp
+      args:
+        - TRUYOU_HOST=127.0.0.1
+        - TRUYOU_PORT=3000
+    restart: on-failure
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+
+volumes:
+  truyou_data:
