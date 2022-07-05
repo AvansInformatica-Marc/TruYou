@@ -30,4 +30,8 @@ export class UserReadDto {
     @ApiProperty()
     @IsString()
     serverSignature: string
+
+    // @ApiProperty()
+    // @IsUUID()
+    // responseId: string
 }

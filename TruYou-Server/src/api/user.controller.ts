@@ -1,5 +1,5 @@
-import { Body, Controller, Get, NotFoundException, Param, ParseUUIDPipe, Post, UnauthorizedException, ValidationPipe } from "@nestjs/common"
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger"
+import { Body, Controller, Get, NotFoundException, Param, ParseUUIDPipe, Post, ValidationPipe } from "@nestjs/common"
+import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger"
 import { validationOptions } from "src/app.constants"
 import { UserEntity } from "src/data/user.entity"
 import { UserService } from "src/data/user.service"
@@ -7,6 +7,7 @@ import { UserAddDto } from "./user-add.dto"
 import { UserReadDto } from "./user-read.dto"
 import { pki } from "node-forge"
 import { CryptoService } from "src/crypto.service"
+// import { randomUUID } from "node:crypto"
 
 @ApiTags("users")
 @Controller({
@@ -45,7 +46,6 @@ export class UserController {
     @Post()
     @ApiCreatedResponse({ type: UserReadDto })
     @ApiBadRequestResponse()
-    @ApiUnauthorizedResponse()
     async createUser(
         @Body(new ValidationPipe(validationOptions)) userAddDto: UserAddDto
     ): Promise<UserReadDto> {
@@ -87,7 +87,7 @@ export class UserController {
 
         const message = `userId:${user.userId};name:${user.name};creationDate:${user.creationDate};` +
             `publicKey:${user.publicKey.replace(/\r\n/g, "")};certificate:${user.certificate?.replace(/\r\n/g, "")};` +
-            `userSignature:${user.userSignature};`
+            `userSignature:${user.userSignature};`//`responseId:${randomUUID()};`
         user.serverSignature = await this.cryptoService.signMessage(message)
         return user
     }
