@@ -87,7 +87,7 @@ export class UserController {
 
         const message = `userId:${user.userId};name:${user.name};creationDate:${user.creationDate};` +
             `publicKey:${user.publicKey.replace(/\r\n/g, "")};certificate:${user.certificate?.replace(/\r\n/g, "")};` +
-            `userSignature:${user.userSignature};`
+            `userSignature:${user.userSignature};`//`responseId:${generate UUID};`
         user.serverSignature = await this.cryptoService.signMessage(message)
         return user
     }
