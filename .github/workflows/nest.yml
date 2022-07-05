@@ -28,4 +28,4 @@ jobs:
 
       # Test
       - name: Test project
-        run: cd ./TruYou-server && npm ci && npm run test
+        run: cd "./TruYou-Server" && npm ci && npm run test
