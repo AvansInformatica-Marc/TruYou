@@ -25,11 +25,8 @@ jobs:
         with:
           node-version: '16'
           cache: 'npm'
-
-      # Install dependencies
-      - name: Install dependencies
-        run: npm ci
+          cache-dependency-path: ./TruYou-Server/package-lock.json
 
       # Test
       - name: Test project
-        run: npm run test
+        run: cd "./TruYou-Server" && npm ci && npm run test
